@@ -1,0 +1,327 @@
+/* ==================================================================
+   設計語彙取自搪瓷公車站牌：厚重色帶、壓縮字體的號碼——
+   但改用大地色系重新上色，並加了一層柔和的圓角與陰影。
+   強調色仍由資料新鮮度決定：這是整頁最重要的一件事。
+
+   顏色分兩組：
+   :root[data-theme="light"] 亮色（暖沙／陶土／橄欖）
+   :root[data-theme="dark"]  暗色（深咖啡／燒陶／麥芽）
+   由 js/theme.js 依使用者選擇或系統設定切換。
+   ================================================================== */
+:root{
+  --scale:1;
+  --pad:20px;
+  --r-sm:6px;
+  --r-md:10px;
+  --r-lg:14px;
+  --shadow:0 2px 10px rgba(43,36,28,.10),0 1px 2px rgba(43,36,28,.08);
+}
+
+:root[data-theme="light"]{
+  --paper:#EDE6D6;
+  --raised:#FBF8F1;
+  --sunk:#E4DAC3;
+  --ink:#2B2420;
+  --ink-soft:#6B5F4F;
+  --rule:#D9CCAE;
+
+  --band:#493D2C;
+  --band-2:#31281C;
+  --band-fg:#FBF8F1;
+  --band-fg-soft:#D3BE97;
+  --band-line:#6E5D42;
+
+  --live:#5E7A3D;
+  --stale:#A47617;
+  --dead:#867A64;
+  --alert:#A0432B;
+  --star:#C9911F;
+
+  --alert-bg:#F3E4D8;
+  --alert-fg:#6B2E1B;
+  --notice-bg:#F1E9D4;
+  --notice-fg:#5A4620;
+}
+
+:root[data-theme="dark"]{
+  --paper:#1B1712;
+  --raised:#252019;
+  --sunk:#2D261E;
+  --ink:#EEE4D3;
+  --ink-soft:#B3A488;
+  --rule:#463A2A;
+
+  --band:#120E0A;
+  --band-2:#000000;
+  --band-fg:#F3E9D8;
+  --band-fg-soft:#BFA97D;
+  --band-line:#3C3121;
+
+  --live:#84AC59;
+  --stale:#D3A53E;
+  --dead:#9C8F79;
+  --alert:#DD7855;
+  --star:#E0AC3E;
+
+  --alert-bg:#3A241B;
+  --alert-fg:#F1C7B3;
+  --notice-bg:#332A18;
+  --notice-fg:#E8D9AC;
+
+  --shadow:0 2px 12px rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.3);
+}
+
+:root{ --accent:var(--live); }
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+html,body{background:var(--paper)}
+body{
+  color:var(--ink);
+  font-family:"Noto Sans TC",system-ui,sans-serif;
+  font-size:calc(16px * var(--scale));
+  line-height:1.55;
+  padding-bottom:72px;
+  transition:background .25s ease,color .25s ease;
+}
+body.big{--scale:1.22}
+.num{font-family:"Barlow Condensed","Noto Sans TC",sans-serif;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:0 var(--pad)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--live);outline-offset:2px}
+a{color:inherit}
+
+/* ---------------- 頁首 ---------------- */
+.top{position:sticky;top:0;z-index:30;background:var(--band);color:var(--band-fg);padding-top:14px;
+  box-shadow:var(--shadow)}
+.topbar{display:flex;align-items:flex-start;gap:10px;padding-bottom:14px}
+.topmain{flex:1;min-width:0}
+.eyebrow{font-size:.68em;letter-spacing:.2em;color:var(--band-fg-soft);font-weight:500;margin-bottom:5px;
+  display:flex;align-items:center;gap:9px}
+.clock{letter-spacing:.02em;font-size:1.25em;font-weight:600;color:#E4C978}
+.title{font-size:2.05em;font-weight:900;line-height:1.12;letter-spacing:-.01em;word-break:break-word}
+.sub{font-size:.8em;color:var(--band-fg-soft);margin-top:4px}
+
+.headerTools{display:flex;gap:8px;flex:0 0 auto}
+.iconbtn{background:none;border:1px solid var(--band-line);color:var(--band-fg-soft);border-radius:var(--r-sm);
+  width:2.15em;height:2.15em;line-height:1;cursor:pointer;flex:0 0 auto;font-size:.9em;
+  display:inline-flex;align-items:center;justify-content:center;transition:background .15s ease,color .15s ease}
+.iconbtn:hover{background:rgba(255,255,255,.08);color:var(--band-fg)}
+.back{background:none;border:1px solid var(--band-line);color:var(--band-fg);border-radius:var(--r-sm);
+  width:2.15em;height:2.15em;line-height:1;cursor:pointer;flex:0 0 auto;font-size:1em}
+.back:hover{background:rgba(255,255,255,.08)}
+.bigtoggle[aria-pressed="true"],
+.iconbtn[aria-pressed="true"]{background:var(--band-fg);color:var(--band);border-color:var(--band-fg);font-weight:700}
+
+/* 資料新鮮度的心跳條 */
+.rail{height:5px;background:var(--band-2);position:relative;overflow:hidden}
+.rail i{position:absolute;inset:0 auto 0 0;width:var(--fill,100%);background:var(--accent);
+  transition:width .5s linear,background .8s ease}
+.railmeta{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  padding:7px var(--pad) 11px;font-size:.75em;color:var(--band-fg-soft);background:var(--band)}
+.railmeta b{font-weight:500;color:var(--band-fg)}
+.railmeta .age{font-size:1.15em;font-weight:600}
+
+/* ---------------- 搜尋（現在常駐在頁首） ---------------- */
+.searchrow{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:14px}
+#search{flex:1 1 220px;min-width:0;font:inherit;font-size:.95em;padding:11px 13px;border-radius:var(--r-sm);
+  background:var(--raised);border:1px solid var(--rule);color:var(--ink)}
+.tbtn{font-size:.85em;padding:11px 15px;cursor:pointer;border-radius:var(--r-sm);
+  background:transparent;border:1px solid var(--live);color:var(--live);white-space:nowrap;
+  transition:background .15s ease,color .15s ease}
+.tbtn:hover{background:var(--live);color:var(--raised)}
+.tbtn[aria-pressed="true"]{background:var(--live);color:var(--raised)}
+.tbtn:disabled{opacity:.6;cursor:default}
+/* 搜尋列現在坐在深色頁首帶上，附近站牌按鈕改用頁首的配色語彙 */
+.top .tbtn{border-color:var(--band-line);color:var(--band-fg)}
+.top .tbtn:hover{background:rgba(255,255,255,.1)}
+.top .tbtn:disabled:hover{background:transparent}
+
+.sectionhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  margin:26px 0 8px;padding-bottom:7px;border-bottom:2px solid var(--ink)}
+.sectionhead h2{font-size:.92em;font-weight:700;letter-spacing:.02em}
+.sectionhead span{font-size:.7em;color:var(--ink-soft);text-align:right}
+
+.list{background:var(--raised);border:1px solid var(--rule);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow)}
+.list:empty{display:none}
+.item{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;
+  background:none;border:0;border-top:1px solid var(--rule);text-align:left;cursor:pointer}
+.item:first-child{border-top:0}
+.item:hover{background:var(--sunk)}
+.itemmain{flex:1;min-width:0}
+.itemmain b{display:block;font-size:.95em;font-weight:500}
+.itemmain small{display:block;font-size:.72em;color:var(--ink-soft);margin-top:2px}
+.dist{font-family:"Barlow Condensed",sans-serif;font-size:.95em;font-weight:600;color:var(--ink-soft);flex:0 0 auto}
+.star{background:none;border:0;cursor:pointer;font-size:1.1em;line-height:1;color:var(--rule);
+  padding:6px;flex:0 0 auto}
+.star.on{color:var(--star)}
+
+.pills{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.pill{display:inline-block;font-family:"Barlow Condensed",sans-serif;font-size:.72em;
+  font-weight:700;font-style:normal;color:#fff;padding:1px 7px;border-radius:4px;line-height:1.6}
+
+.empty{padding:22px 14px;font-size:.85em;color:var(--ink-soft);text-align:center;
+  background:var(--raised);border:1px solid var(--rule);border-radius:var(--r-md);margin-top:10px}
+
+/* ---------------- 問路規劃卡片 ---------------- */
+.tripcard{background:var(--raised);border:1px solid var(--rule);border-top:3px solid var(--live);
+  border-radius:var(--r-md);padding:16px;box-shadow:var(--shadow)}
+.tripheading{font-size:1.05em;font-weight:700;letter-spacing:.01em}
+.tripcardsub{font-size:.78em;color:var(--ink-soft);margin:4px 0 12px}
+.triprow{display:flex;gap:8px;flex-wrap:wrap}
+.triprow input{flex:1 1 200px;min-width:0;font:inherit;font-size:.92em;padding:10px 12px;border-radius:var(--r-sm);
+  background:var(--sunk);border:1px solid var(--rule);color:var(--ink)}
+
+.tripplan{margin-top:14px;padding-top:14px;border-top:1px dashed var(--rule)}
+.tripplan--error{font-size:.85em;color:var(--alert);line-height:1.5}
+.tripplan--loading{font-size:.85em;color:var(--ink-soft);line-height:1.5}
+.tripnote{font-size:.75em;color:var(--stale);margin-bottom:8px}
+.tripbadge{display:block;font-size:.72em;font-weight:700;letter-spacing:.04em;color:var(--live);
+  text-transform:uppercase;margin-bottom:10px}
+.tripsteps{display:flex;flex-direction:column;gap:10px}
+.tripstep{display:flex;align-items:flex-start;gap:10px}
+.tripstep .pill{flex:0 0 auto;margin-top:1px;padding:2px 8px}
+.tripdot{width:10px;height:10px;border-radius:50%;border:2px solid var(--ink);flex:0 0 auto;margin:4px 5px 0}
+.tripstepmain{flex:1;min-width:0;font-size:.85em}
+.tripstepmain b{font-weight:500}
+.tripstepmain small{display:block;color:var(--ink-soft);margin-top:2px;font-size:.85em}
+.triptotal{font-size:.8em;font-weight:600;margin-top:12px}
+.tripcaveat{font-size:.7em;color:var(--ink-soft);margin-top:4px}
+.tripviewbtn{margin-top:12px;width:100%;text-align:center}
+
+/* ---------------- 左右兩欄：左邊選站/看板，右邊地圖常駐 ----------------
+   窄螢幕（手機）疊成單欄時，地圖排在清單「前面」而且整段黏在頁首下方——
+   不然清單一長（收藏、熱門站牌、看板列表…）地圖就會被擠到最下面，
+   要滑到底才看得到，等於沒有「常駐顯示」。 */
+.layout{display:flex;flex-direction:column;gap:22px;padding-top:20px}
+.panel-left{min-width:0;order:2}
+.panel-right{min-width:0;order:1;position:sticky;top:calc(var(--header-h, 150px) + 12px);z-index:5}
+
+@media(min-width:900px){
+  .layout{display:grid;grid-template-columns:minmax(340px,460px) 1fr;align-items:start;gap:28px}
+  .panel-left{order:0}
+  .panel-right{order:0;top:calc(var(--header-h, 150px) + 18px)}
+}
+
+/* ---------------- 地圖 ---------------- */
+.mapbox{position:relative;border:1px solid var(--rule);border-radius:var(--r-md);overflow:hidden;
+  box-shadow:var(--shadow);background:var(--sunk)}
+.mapbox--main{height:min(46vh,260px)}
+@media(min-width:900px){
+  .mapbox--main{height:min(76vh,720px)}
+}
+.mapbox .leaflet-container{width:100%;height:100%;background:var(--sunk);font-family:inherit}
+.maphint{font-size:.7em;color:var(--ink-soft);margin-top:8px;text-align:center}
+
+.mapresetbtn{position:absolute;top:10px;right:10px;z-index:1000;width:2.3em;height:2.3em;
+  border-radius:var(--r-sm);border:1px solid var(--rule);background:var(--raised);color:var(--ink);
+  cursor:pointer;font-size:1.05em;line-height:1;display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow)}
+.mapresetbtn:hover{background:var(--sunk)}
+.mapresetbtn:active{transform:rotate(-45deg)}
+
+.mapstopicon i{display:block;width:12px;height:12px;border-radius:50%;border:2px solid var(--raised);
+  box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.mapstopicon.big i{width:16px;height:16px;box-shadow:0 0 0 4px rgba(181,101,29,.25),0 1px 3px rgba(0,0,0,.35)}
+.mapbusicon span{display:inline-block;transform:translate(-50%,-100%);font-family:"Barlow Condensed",sans-serif;
+  font-size:.72em;font-weight:700;color:#fff;padding:2px 6px;border-radius:4px;white-space:nowrap;
+  box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.maproutelabel span{display:inline-block;transform:translate(-50%,-100%);font-family:"Barlow Condensed",sans-serif;
+  font-size:.72em;font-weight:700;letter-spacing:.03em;color:#fff;padding:2px 7px;border-radius:4px;white-space:nowrap;
+  box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.mapuserdot i{display:block;width:12px;height:12px;border-radius:50%;background:#2E6FD9;border:2px solid #fff;
+  box-shadow:0 0 0 4px rgba(46,111,217,.28)}
+@media(prefers-reduced-motion:no-preference){
+  .mapuserdot i{animation:beat 2.4s ease-in-out infinite}
+}
+
+.mappopup b{display:block;font-size:.92em;font-weight:700;margin-bottom:2px}
+.mappopup small{display:block;font-size:.76em;color:var(--ink-soft)}
+.mappopup .pills{margin:6px 0 8px}
+.mappopupbtn{width:100%;padding:7px 10px;font-size:.8em;text-align:center}
+
+.leaflet-popup-content-wrapper{background:var(--raised);color:var(--ink);border-radius:var(--r-md)}
+.leaflet-popup-tip{background:var(--raised)}
+.leaflet-control-attribution{background:rgba(251,248,241,.85);color:var(--ink-soft)}
+:root[data-theme="dark"] .leaflet-control-attribution{background:rgba(37,32,25,.85)}
+.leaflet-control-attribution a{color:var(--ink-soft)}
+.leaflet-control-zoom a{background:var(--raised);color:var(--ink);border-color:var(--rule) !important}
+.leaflet-control-zoom a:hover{background:var(--sunk)}
+.leaflet-bar{border-color:var(--rule) !important;box-shadow:var(--shadow)}
+
+/* ---------------- 看板 ---------------- */
+.board{background:var(--raised);border:1px solid var(--rule);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow)}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
+  padding:13px 14px;width:100%;background:none;border:0;border-top:1px solid var(--rule);
+  text-align:left;cursor:pointer}
+.row:first-child{border-top:0}
+.row:hover{background:var(--sunk)}
+.row[aria-expanded="true"]{background:var(--sunk)}
+.row.dim{opacity:.55}
+
+.badge{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1.65em;line-height:1;
+  text-align:center;padding:6px 8px;min-width:2.3em;color:#fff;background:var(--band);border-radius:var(--r-sm)}
+.dest{min-width:0}
+.dest b{display:block;font-size:.95em;font-weight:500;line-height:1.3}
+.dest small{display:block;font-size:.72em;color:var(--ink-soft);margin-top:2px}
+.flag{display:inline-block;font-size:.9em;color:var(--alert);font-weight:700;margin-left:5px}
+
+.eta{text-align:right;min-width:5.2em}
+.eta .big{font-family:"Barlow Condensed",sans-serif;font-size:1.95em;font-weight:700;
+  line-height:1;color:var(--accent)}
+.eta .big .u{font-size:.45em;font-weight:500;margin-left:2px}
+.eta .word{font-size:.85em;font-weight:500;color:var(--dead);line-height:1.2;display:block;padding:5px 0}
+.eta .word.warn{color:var(--stale)}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:.66em;color:var(--ink-soft);margin-top:5px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:0 0 auto}
+.dot.hollow{background:none;border:1.5px solid var(--dead)}
+@media(prefers-reduced-motion:no-preference){
+  .dot:not(.hollow){animation:beat 2.4s ease-in-out infinite}
+}
+@keyframes beat{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ---------------- 展開的路線帶 ---------------- */
+.strip{padding:2px 14px 18px;background:var(--sunk);border-top:1px dashed var(--rule)}
+.strip h3{font-size:.68em;letter-spacing:.14em;color:var(--ink-soft);font-weight:500;margin:13px 0 11px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.striptoggle{font-size:1em;letter-spacing:normal;padding:4px 9px;border-radius:var(--r-sm);
+  background:transparent;border:1px solid var(--rule);color:var(--ink-soft);cursor:pointer;white-space:nowrap}
+.striptoggle:hover{background:var(--raised)}
+.striptoggle[aria-pressed="true"]{background:var(--band);color:var(--band-fg);border-color:var(--band)}
+.line{position:relative;padding-left:28px}
+.line::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--rule)}
+.stopdot{position:relative;padding:7px 0;font-size:.82em;color:var(--ink-soft)}
+.stopdot::before{content:"";position:absolute;left:-25px;top:.85em;width:8px;height:8px;
+  border-radius:50%;background:var(--paper);border:2px solid var(--rule)}
+.stopdot.here{color:var(--ink);font-weight:700}
+.stopdot.here::before{background:var(--ink);border-color:var(--ink)}
+.stopdot.passed{opacity:.45}
+.bus{position:absolute;left:-33px;top:.45em;font-family:"Barlow Condensed",sans-serif;
+  font-size:.72em;font-weight:700;color:#fff;padding:1px 5px;border-radius:4px;white-space:nowrap}
+@media(prefers-reduced-motion:no-preference){
+  .bus{transition:top .8s ease}
+}
+
+/* ---------------- 事故通報與替代路線 ---------------- */
+.alert{margin-top:20px;background:var(--alert-bg);border-left:4px solid var(--alert);padding:13px 15px;
+  border-radius:0 var(--r-md) var(--r-md) 0}
+.alert h3{font-size:.88em;font-weight:700;color:var(--alert);margin-bottom:4px}
+.alert p{font-size:.8em;color:var(--alert-fg);line-height:1.55}
+.alts{margin-top:11px;display:flex;flex-direction:column;gap:7px}
+.alt{display:flex;align-items:center;gap:10px;background:var(--raised);border-radius:var(--r-sm);
+  border:1px solid var(--rule);padding:9px 11px;width:100%;text-align:left;cursor:pointer}
+.alt:hover{background:var(--sunk)}
+.altmain{flex:1;min-width:0;font-size:.8em}
+.altmain b{font-weight:500}
+.altmain small{display:block;color:var(--ink-soft);font-size:.86em;margin-top:1px}
+.alteta{font-family:"Barlow Condensed",sans-serif;font-size:1.35em;font-weight:700;color:var(--live)}
+
+/* ---------------- 提示與示範開關 ---------------- */
+.notice{margin-top:14px;padding:11px 13px;border-left:3px solid var(--stale);border-radius:0 var(--r-sm) var(--r-sm) 0;
+  background:var(--notice-bg);font-size:.78em;color:var(--notice-fg);line-height:1.55}
+
+.tools{margin-top:30px;padding-top:16px;border-top:1px solid var(--rule)}
+.tools p{font-size:.72em;letter-spacing:.14em;color:var(--ink-soft);margin-bottom:10px}
+.toolrow{display:flex;gap:8px;flex-wrap:wrap}
+
+.foot{margin-top:22px;font-size:.68em;color:var(--ink-soft);line-height:1.6}
