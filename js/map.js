@@ -1,7 +1,8 @@
 /* ==================================================================
    地圖
-   用 Leaflet + CARTO 免金鑰地圖圖磚（亮色 light_all／暗色 dark_all），
-   不需要申請任何 API 金鑰。同一支檔案管兩張地圖：
+   用 Leaflet + Esri 免金鑰地圖圖磚（亮色 Light Gray／暗色 Dark Gray Canvas），
+   不需要申請任何 API 金鑰。（原本用的 CARTO 圖磚已改成要 API key，
+   沒帶 key 只會顯示「API KEY REQUIRED」。）同一支檔案管兩張地圖：
    一張是選站畫面的總覽地圖，一張是站牌看板裡「在地圖上顯示」的路線圖。
    ================================================================== */
 window.MAP = (function () {
@@ -9,12 +10,12 @@ window.MAP = (function () {
   const D = window.DATA;
 
   const TILE = {
-    light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    light: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    dark: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
   };
   const ATTRIBUTION =
-    '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors ' +
-    '&copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
+    'Tiles &copy; <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a> &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors';
+  const TILE_OPTS = { maxNativeZoom: 16, maxZoom: 19, attribution: ATTRIBUTION }; // Canvas 圖磚原生只到 z16，再放大就拉伸
   const CENTER = [24.8018, 120.9718]; // 新竹火車站，找不到定位時的預設中心
 
   const instances = {}; // containerId -> { map, tile, themeName, markers, route, user }
@@ -39,7 +40,7 @@ window.MAP = (function () {
     map.on('blur', () => map.scrollWheelZoom.disable());
 
     const themeName = window.THEME ? window.THEME.get() : 'light';
-    const tile = L.tileLayer(TILE[themeName], { subdomains: 'abcd', maxZoom: 19, attribution: ATTRIBUTION }).addTo(map);
+    const tile = L.tileLayer(TILE[themeName], TILE_OPTS).addTo(map);
 
     inst = {
       map, tile, themeName,
@@ -57,7 +58,7 @@ window.MAP = (function () {
     Object.values(instances).forEach((inst) => {
       if (inst.themeName === themeName) return;
       inst.map.removeLayer(inst.tile);
-      inst.tile = L.tileLayer(TILE[themeName], { subdomains: 'abcd', maxZoom: 19, attribution: ATTRIBUTION }).addTo(inst.map);
+      inst.tile = L.tileLayer(TILE[themeName], TILE_OPTS).addTo(inst.map);
       inst.tile.bringToBack();
       inst.themeName = themeName;
     });
